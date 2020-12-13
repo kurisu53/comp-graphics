@@ -7,9 +7,14 @@ out vec3 FragPosition;
 out vec3 Normal;
 out vec2 TexCoord;
 
+out float fogFactor;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+
+uniform float fogDensity;
+uniform float fogGradient;
 
 void main()
 {
@@ -18,6 +23,11 @@ void main()
 	TexCoord = texCoords; 
 	Normal = normalize(normalMatrix * normals);
 	FragPosition = vec3(model * vec4(position, 1.0));
+
+	vec4 CameraPosition = view * model * vec4(position, 1.0);
+	float distance = length(CameraPosition.xyz);
+	fogFactor = exp(-pow((distance * fogDensity), fogGradient));
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
 
 	gl_Position = projection * view * vec4(FragPosition, 1.0f);
 }

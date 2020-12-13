@@ -38,6 +38,8 @@ bool lightOn = true;
 bool lPressed = false;
 bool Blinn = true;
 bool bPressed = false;
+bool fogOn = false;
+bool fPressed = false;
 
 int main()
 {
@@ -289,6 +291,10 @@ int main()
 
     commonShader.use();
     commonShader.setInt("texture1", 0);
+    commonShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    commonShader.setFloat("fogDensity", 0.1f);
+    commonShader.setFloat("fogGradient", 0.9f);
+    commonShader.setVec3("fogColor", 0.1f, 0.1f, 0.1f);
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
@@ -298,7 +304,7 @@ int main()
     std::cout << "Z - toggle skybox (off by default)\n";
     std::cout << "L - toggle lighting (on by default)\n";
     std::cout << "B - switch the lighting between Blinn-Phong model and Phong model (Blinn-Phong model is set by default)\n";
-
+    std::cout << "F - toggle fog (off by default). Fog can be switched on only if skybox is switched off\n";
 
     while (!glfwWindowShouldClose(window))
     {
@@ -315,7 +321,7 @@ int main()
         commonShader.use();
         commonShader.setBool("lightOn", lightOn);
         commonShader.setBool("Blinn", Blinn);
-        commonShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        commonShader.setBool("fogOn", fogOn);
         commonShader.setVec3("lightPosition", lightPosition);
         commonShader.setVec3("viewPosition", camera.Position);
 
@@ -449,6 +455,13 @@ void processInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
         bPressed = false;
+
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !skyboxOn && !fPressed) {
+        fogOn = !fogOn;
+        fPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
+        fPressed = false;
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)

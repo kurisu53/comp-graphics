@@ -5,14 +5,18 @@ in vec3 FragPosition;
 in vec3 Normal;
 in vec2 TexCoord;
 
+in float fogFactor;
+
 uniform vec3 lightPosition;
 uniform vec3 viewPosition;
 uniform vec3 lightColor;
-
+uniform vec3 fogColor;
+ 
 uniform sampler2D texture1;
 
 uniform bool lightOn;
 uniform bool Blinn;
+uniform bool fogOn;
 uniform float shininess; 
 
 void main()
@@ -39,8 +43,12 @@ void main()
 
         vec4 texColor = texture(texture1, TexCoord);
         FragColor = vec4(ambient + diffuse, 1.0) * texColor + vec4(specular, 1.0);
+        if (fogOn)
+            FragColor = mix(vec4(fogColor, 1.0f), FragColor, fogFactor);
     }
     else {
         FragColor = texture(texture1, TexCoord);
+        if (fogOn)
+            FragColor = mix(vec4(fogColor, 1.0f), FragColor, fogFactor);
     }
 }
