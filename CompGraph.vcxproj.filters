@@ -46,6 +46,8 @@
     <None Include="shaders\light.vs" />
     <None Include="shaders\skybox.fs" />
     <None Include="shaders\skybox.vs" />
+    <None Include="shaders\screen.fs" />
+    <None Include="shaders\screen.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\bricks.jpg">

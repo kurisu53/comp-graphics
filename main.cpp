@@ -40,6 +40,8 @@ bool Blinn = true;
 bool bPressed = false;
 bool fogOn = false;
 bool fPressed = false;
+bool monochromeOn = false;
+bool mPressed = false;
 
 int main()
 {
@@ -70,6 +72,7 @@ int main()
     Shader commonShader("shaders/common.vs", "shaders/common.fs");
     Shader lightShader("shaders/light.vs", "shaders/light.fs");
     Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
+    Shader posteffectShader("shaders/screen.vs", "shaders/screen.fs");
 
     float groundVertices[] = {
         10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f, 10.0f,  0.0f,
@@ -221,6 +224,15 @@ int main()
          1.0f, -1.0f,  1.0f
     };
 
+    float screenVertices[] = {
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
     unsigned int groundVAO, groundVBO;
     glGenVertexArrays(1, &groundVAO);
     glGenBuffers(1, &groundVBO);
@@ -273,6 +285,41 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
     glBindVertexArray(0);
 
+    unsigned int screenVAO, screenVBO;
+    glGenVertexArrays(1, &screenVAO);
+    glGenBuffers(1, &screenVBO);
+    glBindVertexArray(screenVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, screenVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screenVertices), &screenVertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glBindVertexArray(0);
+
+    unsigned int frameBuffer;
+    glGenFramebuffers(1, &frameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+    unsigned int texColorBuffer;
+    glGenTextures(1, &texColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+    unsigned int RBO;
+    glGenRenderbuffers(1, &RBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT); 
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO); 
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cerr << "ERROR: framebuffer is not complete" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     unsigned int groundTex = loadTexture("textures/Cement.jpg");
 
     unsigned int boxTextures[5];
@@ -299,12 +346,16 @@ int main()
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
+    posteffectShader.use();
+    posteffectShader.setInt("scrTexture", 0);
+
     std::cout << "CONTROLS:\n\n";
     std::cout << "WASD - camera movement, mouse - camera rotation, mousewheel - zoom in/out\n";
     std::cout << "Z - toggle skybox (off by default)\n";
     std::cout << "L - toggle lighting (on by default)\n";
     std::cout << "B - switch the lighting between Blinn-Phong model and Phong model (Blinn-Phong model is set by default)\n";
     std::cout << "F - toggle fog (off by default). Fog can be switched on only if skybox is switched off\n";
+    std::cout << "M - toggle monochrome mode (off by default)\n";
 
     while (!glfwWindowShouldClose(window))
     {
@@ -312,6 +363,10 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         processInput(window);
+
+        glEnable(GL_DEPTH_TEST);
+        if (monochromeOn) 
+            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -403,6 +458,19 @@ int main()
             glDepthFunc(GL_LESS);
         }
 
+        if (monochromeOn) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glDisable(GL_DEPTH_TEST);
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            posteffectShader.use();
+            glBindVertexArray(screenVAO);
+            glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -411,10 +479,12 @@ int main()
     glDeleteVertexArrays(1, &boxVAO);
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteVertexArrays(1, &skyboxVAO);
+    glDeleteVertexArrays(1, &screenVAO);
     glDeleteBuffers(1, &groundVBO);
     glDeleteBuffers(1, &boxVBO);
     glDeleteBuffers(1, &lightVBO);
     glDeleteBuffers(1, &skyboxVBO);
+    glDeleteBuffers(1, &screenVBO);
 
     glfwTerminate();
 
@@ -462,6 +532,13 @@ void processInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
         fPressed = false;
+
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mPressed) {
+        monochromeOn = !monochromeOn;
+        mPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
+        mPressed = false;
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)

@@ -160,6 +160,8 @@
     <None Include="shaders\common.vs" />
     <None Include="shaders\light.fs" />
     <None Include="shaders\light.vs" />
+    <None Include="shaders\screen.fs" />
+    <None Include="shaders\screen.vs" />
     <None Include="shaders\skybox.fs" />
     <None Include="shaders\skybox.vs" />
   </ItemGroup>
