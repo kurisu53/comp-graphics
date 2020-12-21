@@ -48,6 +48,8 @@
     <None Include="shaders\skybox.vs" />
     <None Include="shaders\screen.fs" />
     <None Include="shaders\screen.vs" />
+    <None Include="shaders\wallNormal.fs" />
+    <None Include="shaders\wallNormal.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\bricks.jpg">
@@ -84,6 +86,12 @@
       <Filter>Файлы ресурсов</Filter>
     </Image>
     <Image Include="textures\yellowstone.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="textures\wall_diffuse.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="textures\wall_normal.jpg">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

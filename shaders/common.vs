@@ -20,9 +20,9 @@ void main()
 {
 	mat3 normalMatrix = mat3(transpose(inverse(model)));
 
-	TexCoord = texCoords; 
-	Normal = normalize(normalMatrix * normals);
 	FragPosition = vec3(model * vec4(position, 1.0));
+	Normal = normalize(normalMatrix * normals);
+	TexCoord = texCoords; 
 
 	vec4 CameraPosition = view * model * vec4(position, 1.0);
 	float distance = length(CameraPosition.xyz);

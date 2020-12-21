@@ -164,6 +164,8 @@
     <None Include="shaders\screen.vs" />
     <None Include="shaders\skybox.fs" />
     <None Include="shaders\skybox.vs" />
+    <None Include="shaders\wallNormal.fs" />
+    <None Include="shaders\wallNormal.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\bricks.jpg" />
@@ -176,6 +178,8 @@
     <Image Include="textures\posy.jpg" />
     <Image Include="textures\posz.jpg" />
     <Image Include="textures\stone.jpg" />
+    <Image Include="textures\wall_diffuse.jpg" />
+    <Image Include="textures\wall_normal.jpg" />
     <Image Include="textures\wood.png" />
     <Image Include="textures\yellowstone.jpg" />
   </ItemGroup>
