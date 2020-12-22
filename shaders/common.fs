@@ -12,7 +12,7 @@ uniform vec3 viewPosition;
 uniform vec3 lightColor;
 uniform vec3 fogColor;
  
-uniform sampler2D texture1;
+uniform sampler2D tex;
 
 uniform bool lightOn;
 uniform bool Blinn;
@@ -41,13 +41,13 @@ void main()
 
         specular = specularStrength * spec * lightColor;
 
-        vec4 texColor = texture(texture1, TexCoord);
+        vec4 texColor = texture(tex, TexCoord);
         FragColor = vec4(ambient + diffuse, 1.0) * texColor + vec4(specular, 1.0);
         if (fogOn)
             FragColor = mix(vec4(fogColor, 1.0f), FragColor, fogFactor);
     }
     else {
-        FragColor = texture(texture1, TexCoord);
+        FragColor = texture(tex, TexCoord);
         if (fogOn)
             FragColor = mix(vec4(fogColor, 1.0f), FragColor, fogFactor);
     }

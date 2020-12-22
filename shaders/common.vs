@@ -20,14 +20,14 @@ void main()
 {
 	mat3 normalMatrix = mat3(transpose(inverse(model)));
 
-	FragPosition = vec3(model * vec4(position, 1.0));
+	FragPosition = vec3(model * vec4(position, 1.0f));
 	Normal = normalize(normalMatrix * normals);
 	TexCoord = texCoords; 
 
-	vec4 CameraPosition = view * model * vec4(position, 1.0);
+	vec4 CameraPosition = view * model * vec4(position, 1.0f);
 	float distance = length(CameraPosition.xyz);
 	fogFactor = exp(-pow((distance * fogDensity), fogGradient));
-    fogFactor = clamp(fogFactor, 0.0, 1.0);
+    fogFactor = clamp(fogFactor, 0.0f, 1.0f);
 
-	gl_Position = projection * view * vec4(FragPosition, 1.0f);
+	gl_Position = projection * view * model * vec4(position, 1.0f);
 }
