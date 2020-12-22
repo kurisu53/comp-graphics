@@ -1,12 +1,13 @@
 ﻿  main.cpp
-D:\VSrepo\CompGraph\main.cpp(457,28): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(687,31): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(693,17): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(694,17): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(698,19): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(699,19): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(701,13): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-D:\VSrepo\CompGraph\main.cpp(702,13): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(39,22): warning C4305: инициализация: усечение из "double" в "float"
+D:\VSrepo\CompGraph\main.cpp(465,28): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(715,31): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(721,17): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(722,17): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(726,19): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(727,19): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(729,13): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+D:\VSrepo\CompGraph\main.cpp(730,13): warning C4244: =: преобразование "double" в "float", возможна потеря данных
 LINK : warning LNK4098: библиотека по умолчанию "MSVCRTD" конфликтует с использованием других библиотек; используйте /NODEFAULTLIB:library
   Создание кода
   1 of 509 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
