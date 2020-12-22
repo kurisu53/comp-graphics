@@ -36,6 +36,8 @@ float lastFrame = 0.0f;
 
 glm::vec3 lightPosition(0.0f, 10.0f, 0.0f);
 
+float bumpScale = 0.1;
+
 // input flags
 
 bool skyboxOn = false;
@@ -48,6 +50,8 @@ bool fogOn = false;
 bool fPressed = false;
 bool monochromeOn = false;
 bool mPressed = false;
+bool parallaxOn = false;
+bool pPressed = true;
 
 int main()
 {
@@ -412,6 +416,7 @@ int main()
 
     unsigned int wallDiffuse = loadTexture("textures/wall_diffuse.jpg");
     unsigned int wallNormal = loadTexture("textures/wall_normal.jpg");
+    unsigned int wallBump = loadTexture("textures/wall_bump.jpg");
 
     std::vector<std::string> skyboxFaces{
         "textures/posx.jpg", "textures/negx.jpg",
@@ -423,7 +428,7 @@ int main()
     // setting uniforms
 
     commonShader.use();
-    commonShader.setInt("texture1", 0);
+    commonShader.setInt("tex", 0);
     commonShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     commonShader.setFloat("fogDensity", 0.1f);
     commonShader.setFloat("fogGradient", 0.9f);
@@ -432,6 +437,8 @@ int main()
     wallNormalShader.use();
     wallNormalShader.setInt("diffuseMap", 0);
     wallNormalShader.setInt("normalMap", 1);
+    wallNormalShader.setInt("bumpMap", 2);
+    wallNormalShader.setFloat("bumpScale", bumpScale);
     wallNormalShader.setFloat("fogDensity", 0.1f);
     wallNormalShader.setFloat("fogGradient", 0.9f);
     wallNormalShader.setVec3("fogColor", 0.1f, 0.1f, 0.1f);
@@ -451,6 +458,7 @@ int main()
     std::cout << "B - switch the lighting between Blinn-Phong model and Phong model (Blinn-Phong model is set by default)\n";
     std::cout << "F - toggle fog (off by default). Fog can be switched on only if skybox is switched off\n";
     std::cout << "M - toggle monochrome mode (off by default)\n";
+    std::cout << "P - switch between simple normal mapping and parallax mapping (simple normal mapping is set by default)\n\n";
 
     while (!glfwWindowShouldClose(window))
     {
@@ -538,11 +546,12 @@ int main()
         wallNormalShader.setBool("lightOn", lightOn);
         wallNormalShader.setBool("Blinn", Blinn);
         wallNormalShader.setBool("fogOn", fogOn);
+        wallNormalShader.setBool("parallaxOn", parallaxOn);
         wallNormalShader.setVec3("viewPosition", camera.Position);
         wallNormalShader.setVec3("lightPosition", lightPosition);
         glm::mat4 wallModel = glm::mat4(1.0f);
         wallModel = glm::translate(wallModel, wallPosition);
-        wallModel = glm::rotate(wallModel, -0.5f * (float)glfwGetTime(), glm::vec3(3.0f, 1.0f, 2.0f));
+        wallModel = glm::rotate(wallModel, -0.1f * (float)glfwGetTime(), glm::vec3(3.0f, 1.0f, 2.0f));
         wallModel = glm::scale(wallModel, glm::vec3(2.5f));
         wallNormalShader.setMat4("model", wallModel);
         wallNormalShader.setFloat("shininess", 15.0);
@@ -551,6 +560,10 @@ int main()
         glBindTexture(GL_TEXTURE_2D, wallDiffuse);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, wallNormal);
+        if (parallaxOn) {
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, wallBump);
+        }
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
         glActiveTexture(GL_TEXTURE0);
@@ -657,6 +670,10 @@ void processInput(GLFWwindow* window)
 
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !bPressed) {
         Blinn = !Blinn;
+        if (Blinn)
+            std::cout << "Switched to Blinn-Phong\n";
+        else
+            std::cout << "Switched to Phong\n";
         bPressed = true;
     }
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
@@ -675,6 +692,17 @@ void processInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
         mPressed = false;
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !pPressed) {
+        parallaxOn = !parallaxOn;
+        if (parallaxOn)
+            std::cout << "Parallax mapping on\n";
+        else
+            std::cout << "Simple normal mapping on\n";
+        pPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE)
+        pPressed = false;
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
