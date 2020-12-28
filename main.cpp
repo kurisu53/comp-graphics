@@ -1,4 +1,5 @@
-#include <iostream>
+﻿#include <iostream>
+#include <vector>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -24,8 +25,8 @@ unsigned int loadCubeTexture(std::vector<std::string> faces);
 
 // global constants
 
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
+const unsigned int SCREEN_WIDTH = 1280;
+const unsigned int SCREEN_HEIGHT = 720;
 
 Camera camera(glm::vec3(0.0f, 12.0f, -23.6f)); // camera initial position
 bool firstMouse = true;
@@ -86,6 +87,7 @@ int main()
     Shader commonShader("shaders/common.vs", "shaders/common.fs");
     Shader lightShader("shaders/light.vs", "shaders/light.fs");
     Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
+    Shader reflectShader("shaders/reflect.vs", "shaders/reflect.fs");
     Shader posteffectShader("shaders/screen.vs", "shaders/screen.fs");
     Shader wallNormalShader("shaders/wallNormal.vs", "shaders/wallNormal.fs");
 
@@ -150,6 +152,51 @@ int main()
         glm::vec3(6.1f, 2.7f, 2.4f),
         glm::vec3(7.6f, 3.9f, -5.8f),
         glm::vec3(-5.9f, 4.4f, -3.3f)
+    };
+
+    float mirrorCubeVertices[] = {
+        // back
+        -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 
+        -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 
+        // front
+        -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 
+        -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        // left
+        -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 
+        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
+        // right
+        1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
+        1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
+        1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
+        1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
+        1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 
+        1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
+        // bottom
+        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 
+        1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
+        1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 
+        1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 
+        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 
+        // top
+        -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f,
+        1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 
+        1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 
+        -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 
+        -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,
     };
 
     float lightVertices[] = {
@@ -256,7 +303,7 @@ int main()
     glm::vec3 normal(0.0f, 0.0f, 1.0f);
     glm::vec2 tex1(0.0f, 1.0f), tex2(0.0f, 0.0f), tex3(1.0f, 0.0f), tex4(1.0f, 1.0f);
     glm::vec3 tang1, tang2, bitang1, bitang2;
-    
+
     glm::vec3 edge1 = pos2 - pos1, edge2 = pos3 - pos1;
     glm::vec2 delta1 = tex2 - tex1, delta2 = tex3 - tex1;
     float frac = 1.0f / (delta1.x * delta2.y - delta2.x * delta1.y);
@@ -288,7 +335,7 @@ int main()
         pos3.x, pos3.y, pos3.z, normal.x, normal.y, normal.z, tex3.x, tex3.y, tang2.x, tang2.y, tang2.z, bitang2.x, bitang2.y, bitang2.z,
         pos4.x, pos4.y, pos4.z, normal.x, normal.y, normal.z, tex4.x, tex4.y, tang2.x, tang2.y, tang2.z, bitang2.x, bitang2.y, bitang2.z
     };
-    glm::vec3 wallPosition (-7.0f, 5.0f, 2.0f);
+    glm::vec3 wallPosition(-7.0f, 5.0f, 2.0f);
 
     // generating vertex arrays and buffers
 
@@ -324,6 +371,19 @@ int main()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*)(6 * sizeof(float)));
     glBindVertexArray(0);
 
+    // reflecting cube
+    unsigned int mirrorCubeVAO, mirrorCubeVBO;
+    glGenVertexArrays(1, &mirrorCubeVAO);
+    glGenBuffers(1, &mirrorCubeVBO);
+    glBindVertexArray(mirrorCubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, mirrorCubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mirrorCubeVertices), &mirrorCubeVertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
     // wall quad
     unsigned int wallVAO, wallVBO;
     glGenVertexArrays(1, &wallVAO);
@@ -331,6 +391,7 @@ int main()
     glBindVertexArray(wallVAO);
     glBindBuffer(GL_ARRAY_BUFFER, wallVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertices), &wallVertices, GL_STATIC_DRAW);
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
@@ -446,6 +507,9 @@ int main()
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
+    reflectShader.use();
+    reflectShader.setInt("skybox", 0);
+
     posteffectShader.use();
     posteffectShader.setInt("scrTexture", 0);
 
@@ -453,7 +517,7 @@ int main()
 
     std::cout << "CONTROLS:\n\n";
     std::cout << "WASD - camera movement, mouse - camera rotation, mousewheel - zoom in/out\n";
-    std::cout << "Z - toggle skybox (off by default)\n";
+    std::cout << "Z - toggle skybox and reflecting cube (off by default)\n";
     std::cout << "L - toggle lighting (on by default)\n";
     std::cout << "B - switch the lighting between Blinn-Phong model and Phong model (Blinn-Phong model is set by default)\n";
     std::cout << "F - toggle fog (off by default). Fog can be switched on only if skybox is switched off\n";
@@ -490,102 +554,124 @@ int main()
         commonShader.setMat4("view", view);
         commonShader.setMat4("projection", projection);
 
-        // rendering ground
+        // rendering textured boxes and wall with normal mapping if skybox is off
 
-        glBindVertexArray(groundVAO);
-        glm::mat4 groundModel = glm::mat4(1.0f);
-        commonShader.setMat4("model", groundModel);
-        commonShader.setFloat("shininess", 2.0);
-        glBindTexture(GL_TEXTURE_2D, groundTex);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        if (!skyboxOn) {
 
-        // rendering boxes
+            // rendering ground
 
-        glBindVertexArray(boxVAO);
-        for (unsigned int i = 0; i < 5; i++) {
-            glm::mat4 boxModel = glm::mat4(1.0f);
-            boxModel = glm::translate(boxModel, boxPositions[i]);
-            if (i == 0) {
-                boxModel = glm::rotate(boxModel, 0.25f * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-                boxModel = glm::scale(boxModel, glm::vec3(1.25));
-                commonShader.setFloat("shininess", 25.0);
-            }
-            else if (i == 1) {
-                boxModel = glm::rotate(boxModel, 0.5f * (float)glfwGetTime(), glm::vec3(3.4f, 1.1f, 2.8f));
-                boxModel = glm::scale(boxModel, glm::vec3(0.5f));
-                commonShader.setFloat("shininess", 10.0);
-            }
-            else if (i == 2) {
-                boxModel = glm::rotate(boxModel, 0.75f * (float)glfwGetTime(), glm::vec3(-4.1f, 2.5f, -1.7f));
-                boxModel = glm::scale(boxModel, glm::vec3(0.75f));
-                commonShader.setFloat("shininess", 20.0);
-            }
-            else if (i == 3) {
-                boxModel = glm::rotate(boxModel, 1.25f * (float)glfwGetTime(), glm::vec3(-2.0f, 1.5f, 4.5f));
-                boxModel = glm::scale(boxModel, glm::vec3(1.1f));
-                commonShader.setFloat("shininess", 15.0);
-            }
-            else if (i == 4) {
-                boxModel = glm::rotate(boxModel, (float)glfwGetTime(), glm::vec3(1.4f, 3.3f, -3.6f));
-                boxModel = glm::scale(boxModel, glm::vec3(0.9f));
-                commonShader.setFloat("shininess", 10.0);
-            }
-            commonShader.setMat4("model", boxModel);
+            glBindVertexArray(groundVAO);
+            glm::mat4 groundModel = glm::mat4(1.0f);
+            commonShader.setMat4("model", groundModel);
+            commonShader.setFloat("shininess", 2.0);
+            glBindTexture(GL_TEXTURE_2D, groundTex);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
 
-            glBindTexture(GL_TEXTURE_2D, boxTextures[i]);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            // rendering boxes 
+
+            glBindVertexArray(boxVAO);
+            for (unsigned int i = 0; i < 5; i++) {
+                glm::mat4 boxModel = glm::mat4(1.0f);
+                boxModel = glm::translate(boxModel, boxPositions[i]);
+                if (i == 0) {
+                    boxModel = glm::rotate(boxModel, 0.25f * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+                    boxModel = glm::scale(boxModel, glm::vec3(1.25));
+                    commonShader.setFloat("shininess", 25.0);
+                }
+                else if (i == 1) {
+                    boxModel = glm::rotate(boxModel, 0.5f * (float)glfwGetTime(), glm::vec3(3.4f, 1.1f, 2.8f));
+                    boxModel = glm::scale(boxModel, glm::vec3(0.5f));
+                    commonShader.setFloat("shininess", 10.0);
+                }
+                else if (i == 2) {
+                    boxModel = glm::rotate(boxModel, 0.75f * (float)glfwGetTime(), glm::vec3(-4.1f, 2.5f, -1.7f));
+                    boxModel = glm::scale(boxModel, glm::vec3(0.75f));
+                    commonShader.setFloat("shininess", 20.0);
+                }
+                else if (i == 3) {
+                    boxModel = glm::rotate(boxModel, 1.25f * (float)glfwGetTime(), glm::vec3(-2.0f, 1.5f, 4.5f));
+                    boxModel = glm::scale(boxModel, glm::vec3(1.1f));
+                    commonShader.setFloat("shininess", 15.0);
+                }
+                else if (i == 4) {
+                    boxModel = glm::rotate(boxModel, (float)glfwGetTime(), glm::vec3(1.4f, 3.3f, -3.6f));
+                    boxModel = glm::scale(boxModel, glm::vec3(0.9f));
+                    commonShader.setFloat("shininess", 10.0);
+                }
+                commonShader.setMat4("model", boxModel);
+
+                glBindTexture(GL_TEXTURE_2D, boxTextures[i]);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+            glBindVertexArray(0);
+
+            wallNormalShader.use();
+            wallNormalShader.setMat4("view", view);
+            wallNormalShader.setMat4("projection", projection);
+            wallNormalShader.setBool("lightOn", lightOn);
+            wallNormalShader.setBool("Blinn", Blinn);
+            wallNormalShader.setBool("fogOn", fogOn);
+            wallNormalShader.setBool("parallaxOn", parallaxOn);
+            wallNormalShader.setVec3("viewPosition", camera.Position);
+            wallNormalShader.setVec3("lightPosition", lightPosition);
+            glm::mat4 wallModel = glm::mat4(1.0f);
+            wallModel = glm::translate(wallModel, wallPosition);
+            wallModel = glm::rotate(wallModel, -0.1f * (float)glfwGetTime(), glm::vec3(3.0f, 1.0f, 2.0f));
+            wallModel = glm::scale(wallModel, glm::vec3(2.5f));
+            wallNormalShader.setMat4("model", wallModel);
+            wallNormalShader.setFloat("shininess", 15.0);
+            glBindVertexArray(wallVAO);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, wallDiffuse);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, wallNormal);
+            if (parallaxOn) {
+                glActiveTexture(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, wallBump);
+            }
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+            glActiveTexture(GL_TEXTURE0);
+
+            // rendering light source if light is on
+
+            if (lightOn) {
+                lightShader.use();
+                lightShader.setMat4("view", view);
+                lightShader.setMat4("projection", projection);
+                glm::mat4 lightModel = glm::mat4(1.0f);
+                lightModel = glm::translate(lightModel, lightPosition);
+                lightModel = glm::scale(lightModel, glm::vec3(0.1f));
+                lightShader.setMat4("model", lightModel);
+                glBindVertexArray(lightVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+                glBindVertexArray(0);
+            }
         }
-        glBindVertexArray(0);
 
-        // rendering wall quad with normal mapping
+        else {
 
-        wallNormalShader.use();
-        wallNormalShader.setMat4("view", view);
-        wallNormalShader.setMat4("projection", projection);
-        wallNormalShader.setBool("lightOn", lightOn);
-        wallNormalShader.setBool("Blinn", Blinn);
-        wallNormalShader.setBool("fogOn", fogOn);
-        wallNormalShader.setBool("parallaxOn", parallaxOn);
-        wallNormalShader.setVec3("viewPosition", camera.Position);
-        wallNormalShader.setVec3("lightPosition", lightPosition);
-        glm::mat4 wallModel = glm::mat4(1.0f);
-        wallModel = glm::translate(wallModel, wallPosition);
-        wallModel = glm::rotate(wallModel, -0.1f * (float)glfwGetTime(), glm::vec3(3.0f, 1.0f, 2.0f));
-        wallModel = glm::scale(wallModel, glm::vec3(2.5f));
-        wallNormalShader.setMat4("model", wallModel);
-        wallNormalShader.setFloat("shininess", 15.0);
-        glBindVertexArray(wallVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, wallDiffuse);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, wallNormal);
-        if (parallaxOn) {
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, wallBump);
-        }
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-        glActiveTexture(GL_TEXTURE0);
+            // rendering reflecting cube if skybox is on
 
-        // rendering light source if light is on
+            glm::mat4 reflectModel = glm::mat4(1.0f);
+            reflectModel = glm::translate(reflectModel, glm::vec3(0.0f, 1.2f, 0.0f));
+            reflectModel = glm::rotate(reflectModel, 0.1f * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+            reflectModel = glm::scale(reflectModel, glm::vec3(1.25));
 
-        if (lightOn) {
-            lightShader.use();
-            lightShader.setMat4("view", view);
-            lightShader.setMat4("projection", projection);
-            glm::mat4 lightModel = glm::mat4(1.0f);
-            lightModel = glm::translate(lightModel, lightPosition);
-            lightModel = glm::scale(lightModel, glm::vec3(0.1f));
-            lightShader.setMat4("model", lightModel);
-            glBindVertexArray(lightVAO);
+            reflectShader.use();
+            reflectShader.setMat4("model", reflectModel);
+            reflectShader.setMat4("view", view);
+            reflectShader.setMat4("projection", projection);
+            reflectShader.setVec3("viewPosition", camera.Position);
+            glBindVertexArray(mirrorCubeVAO);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, skyTex);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glBindVertexArray(0);
-        }
 
-        // rendering skybox
+            // rendering skybox
 
-        if (skyboxOn) {
             glDepthFunc(GL_LEQUAL);
 
             skyboxShader.use();
@@ -624,12 +710,14 @@ int main()
 
     glDeleteVertexArrays(1, &groundVAO);
     glDeleteVertexArrays(1, &boxVAO);
+    glDeleteVertexArrays(1, &mirrorCubeVAO);
     glDeleteVertexArrays(1, &wallVAO);
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteVertexArrays(1, &screenVAO);
     glDeleteBuffers(1, &groundVBO);
     glDeleteBuffers(1, &boxVBO);
+    glDeleteBuffers(1, &mirrorCubeVBO);
     glDeleteBuffers(1, &wallVBO);
     glDeleteBuffers(1, &lightVBO);
     glDeleteBuffers(1, &skyboxVBO);
