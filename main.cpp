@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <vector>
+#include <map>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -37,6 +38,8 @@ float lastFrame = 0.0f;
 
 glm::vec3 lightPosition(0.0f, 10.0f, 0.0f);
 
+const unsigned int windowsNum = 6;
+
 float bumpScale = 0.1;
 
 // input flags
@@ -54,10 +57,16 @@ bool mPressed = false;
 bool parallaxOn = false;
 bool pPressed = true;
 
+static void glfwError(int id, const char* description)
+{
+    std::cout << description << std::endl;
+}
+
 int main()
 {
-    //initialization
+    // initialization
 
+    glfwSetErrorCallback(&glfwError);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -90,6 +99,7 @@ int main()
     Shader reflectShader("shaders/reflect.vs", "shaders/reflect.fs");
     Shader posteffectShader("shaders/screen.vs", "shaders/screen.fs");
     Shader wallNormalShader("shaders/wallNormal.vs", "shaders/wallNormal.fs");
+    Shader windowShader("shaders/window.vs", "shaders/window.fs");
 
     // object vertices
 
@@ -159,20 +169,20 @@ int main()
         -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
         1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
         1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 
+        1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 
+        -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
         // front
         -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
         1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
         1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
         1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 
+        -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
         -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,
         // left
         -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
         -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
-        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 
+        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
         -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
         -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
         -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
@@ -181,22 +191,41 @@ int main()
         1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
         1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
         1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
-        1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 
+        1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
         1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
         // bottom
-        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 
+        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
         1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
-        1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 
         1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
-        -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 
-        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 
+        1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
         // top
         -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,
         1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f,
-        1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 
-        1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 
-        -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 
+        1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,
         -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+    };
+
+    float windowVertices[] = {
+        0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+        0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+        1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+        0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+        1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+        1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+    };
+    glm::vec3 windowPositions[]
+    {
+        glm::vec3(0.0f, 4.0f, -6.0f),
+        glm::vec3(-0.6f, 4.0f, -7.1f),
+        glm::vec3(1.5f, 4.0f, -6.5f),
+        glm::vec3(-1.3f, 4.0f, -8.7f),
+        glm::vec3(0.85f, 4.0f, -7.4f),
+        glm::vec3(-0.2f, 4.0f, -8.2f)
     };
 
     float lightVertices[] = {
@@ -384,6 +413,20 @@ int main()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
+    // windows
+    unsigned int windowVAO, windowVBO;
+    glGenVertexArrays(1, &windowVAO);
+    glGenBuffers(1, &windowVBO);
+    glBindVertexArray(windowVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, windowVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(windowVertices), windowVertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
     // wall quad
     unsigned int wallVAO, wallVBO;
     glGenVertexArrays(1, &wallVAO);
@@ -475,6 +518,8 @@ int main()
     boxTextures[3] = loadTexture("textures/wood.png");
     boxTextures[4] = loadTexture("textures/yellowstone.jpg");
 
+    unsigned int windowTex = loadTexture("textures/window.png");
+
     unsigned int wallDiffuse = loadTexture("textures/wall_diffuse.jpg");
     unsigned int wallNormal = loadTexture("textures/wall_normal.jpg");
     unsigned int wallBump = loadTexture("textures/wall_bump.jpg");
@@ -510,6 +555,9 @@ int main()
     reflectShader.use();
     reflectShader.setInt("skybox", 0);
 
+    windowShader.use();
+    windowShader.setInt("tex", 0);
+
     posteffectShader.use();
     posteffectShader.setInt("scrTexture", 0);
 
@@ -520,7 +568,6 @@ int main()
     std::cout << "Z - toggle skybox and reflecting cube (off by default)\n";
     std::cout << "L - toggle lighting (on by default)\n";
     std::cout << "B - switch the lighting between Blinn-Phong model and Phong model (Blinn-Phong model is set by default)\n";
-    std::cout << "F - toggle fog (off by default). Fog can be switched on only if skybox is switched off\n";
     std::cout << "M - toggle monochrome mode (off by default)\n";
     std::cout << "P - switch between simple normal mapping and parallax mapping (simple normal mapping is set by default)\n\n";
 
@@ -531,14 +578,37 @@ int main()
         lastFrame = currentFrame;
         processInput(window);
 
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         if (monochromeOn)
             glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glActiveTexture(GL_TEXTURE0);
+
+        // sorting windows
+
+        float windowDistances[windowsNum];
+        glm::vec3 sortedWindows[windowsNum];
+        for (int i = 0; i < windowsNum; i++) {
+            windowDistances[i] = glm::length(camera.Position - windowPositions[i]);
+            sortedWindows[i] = windowPositions[i];
+        }
+        float tempDist;
+        glm::vec3 tempVec = glm::vec3(0.0f);
+        for (int i = 1; i < windowsNum; i++) {
+            for (int j = 0; j < windowsNum - i; j++) {
+                if (windowDistances[j] < windowDistances[j + 1]) {
+                    tempDist = windowDistances[j];
+                    tempVec = sortedWindows[j];
+                    windowDistances[j] = windowDistances[j + 1];
+                    sortedWindows[j] = sortedWindows[j + 1];
+                    windowDistances[j + 1] = tempDist;
+                    sortedWindows[j + 1] = tempVec;
+                }
+            }
+        }
 
         // setting uniforms
 
@@ -554,7 +624,7 @@ int main()
         commonShader.setMat4("view", view);
         commonShader.setMat4("projection", projection);
 
-        // rendering textured boxes and wall with normal mapping if skybox is off
+        // rendering ground, textured boxes, windows and wall with normal mapping if skybox is off
 
         if (!skyboxOn) {
 
@@ -606,6 +676,8 @@ int main()
             }
             glBindVertexArray(0);
 
+            // rendering wall with normal mapping
+
             wallNormalShader.use();
             wallNormalShader.setMat4("view", view);
             wallNormalShader.setMat4("projection", projection);
@@ -648,6 +720,24 @@ int main()
                 glDrawArrays(GL_TRIANGLES, 0, 36);
                 glBindVertexArray(0);
             }
+
+            // rendering windows
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBindVertexArray(windowVAO);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, windowTex);
+            windowShader.use();
+            windowShader.setMat4("view", view);
+            windowShader.setMat4("projection", projection);
+            windowShader.setVec3("camUp", camera.Up);
+            windowShader.setVec3("camRight", camera.Right);
+            for (int i = 0; i < windowsNum; i++) {
+                windowShader.setVec3("placing", sortedWindows[i]);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+            glBindVertexArray(0);
         }
 
         else {
@@ -711,6 +801,7 @@ int main()
     glDeleteVertexArrays(1, &groundVAO);
     glDeleteVertexArrays(1, &boxVAO);
     glDeleteVertexArrays(1, &mirrorCubeVAO);
+    glDeleteVertexArrays(1, &windowVAO);
     glDeleteVertexArrays(1, &wallVAO);
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteVertexArrays(1, &skyboxVAO);
@@ -718,6 +809,7 @@ int main()
     glDeleteBuffers(1, &groundVBO);
     glDeleteBuffers(1, &boxVBO);
     glDeleteBuffers(1, &mirrorCubeVBO);
+    glDeleteBuffers(1, &windowVBO);
     glDeleteBuffers(1, &wallVBO);
     glDeleteBuffers(1, &lightVBO);
     glDeleteBuffers(1, &skyboxVBO);

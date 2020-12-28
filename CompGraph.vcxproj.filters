@@ -52,6 +52,8 @@
     <None Include="shaders\common.vs" />
     <None Include="shaders\reflect.fs" />
     <None Include="shaders\reflect.vs" />
+    <None Include="shaders\window.fs" />
+    <None Include="shaders\window.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\bricks.jpg">
@@ -97,6 +99,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="textures\yellowstone.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\window.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
