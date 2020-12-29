@@ -14,6 +14,7 @@
 **Инструкция по сборке в Visual Studio**  
   
   - Распаковать папки Include и Libs в одну директорию, все остальные файлы в другую.  
-  - Открыть решение CompGraph.sln в Visual Studio. В свойствах проекта CompGraph в разделе VC++ Directories в строках Include Directories и Library Directories указать пути к папкам Include и Libs соответственно.  
+  - Открыть решение CompGraph.sln в Visual Studio. Если какие-то из присутствующих файлов не добавлены в проект CompGraph, добавить их вручную.  
+  - В свойствах проекта CompGraph в разделе VC++ Directories в строках Include Directories и Library Directories указать пути к папкам Include и Libs соответственно.  
   - В разделе свойств Linker -> Input в строке Additional Dependencies прописать библиотеки glfw3.lib и opengl32.lib.  
   - После этого решение можно собрать успешно.
