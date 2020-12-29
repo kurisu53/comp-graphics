@@ -1,0 +1,21 @@
+﻿  Camera.cpp
+  main.cpp
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(43,22): warning C4305: 'initializing': truncation from 'double' to 'float'
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(576,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(601,31): warning C4018: '<': signed/unsigned mismatch
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(895,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(901,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(902,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(906,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(907,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(909,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\СТАФФ\repos\CompGraph\CompGraph\main.cpp(910,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  Shader.cpp
+D:\СТАФФ\repos\CompGraph\CompGraph\Shader.cpp(33,36): warning C4101: 'exception': unreferenced local variable
+  glad.c
+  Previous IPDB not found, fall back to full compilation.
+LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Generating code
+  All 510 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  CompGraph.vcxproj -> D:\СТАФФ\repos\CompGraph\x64\Release\CompGraph.exe
